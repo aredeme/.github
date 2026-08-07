@@ -1,50 +1,75 @@
 name: Trabalho
-description: Registrar uma entrega, melhoria, correção ou atividade do Arede.Me.
-title: "[TRABALHO] "
+description: Registrar uma unidade executável do Arede.Me.
+title: ""
 body:
   - type: textarea
-    id: objetivo
+    id: problema
     attributes:
-      label: Objetivo
-      description: O que precisa ser entregue?
+      label: Problema
+      description: Qual problema concreto precisa ser resolvido?
+    validations:
+      required: true
+
+  - type: textarea
+    id: resultado
+    attributes:
+      label: Resultado esperado
+      description: Qual resultado verificável deve existir ao final?
     validations:
       required: true
 
   - type: textarea
     id: contexto
     attributes:
-      label: Contexto
-      description: Por que este trabalho é necessário?
+      label: Contexto governante
+      description: Referencie decisões, arquitetura, política, ADR, SPEC ou outro contexto aplicável por UUID, Issue ou link.
+    validations:
+      required: true
 
   - type: textarea
-    id: escopo
+    id: dentro
     attributes:
-      label: Escopo
-      description: O que está incluído e o que não está incluído?
+      label: Dentro do escopo
+      description: O que esta unidade está autorizada a tratar?
+    validations:
+      required: true
+
+  - type: textarea
+    id: fora
+    attributes:
+      label: Fora do escopo
+      description: O que permanece explicitamente excluído?
     validations:
       required: true
 
   - type: textarea
     id: aceite
     attributes:
-      label: Critérios de conclusão
-      description: Como saberemos que o trabalho terminou corretamente?
-    validations:
-      required: true
-
-  - type: dropdown
-    id: risco
-    attributes:
-      label: Risco
-      options:
-        - Comum
-        - Sensível
-        - Operacional crítico
+      label: Critérios de aceite
+      description: Como o resultado será objetivamente verificado?
     validations:
       required: true
 
   - type: textarea
-    id: referencia
+    id: riscos
     attributes:
-      label: Documento governante
-      description: Informe o documento do Arede Docs, ADR ou especificação, quando existir.
+      label: Riscos e dados
+      description: Declare perfil de rigor, dados envolvidos e gatilhos relevantes. Use os identificadores comum, sensivel ou operacional_critico no texto do contrato.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidencias
+    attributes:
+      label: Evidências esperadas
+      description: Quais provas deverão demonstrar os critérios de aceite?
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencias
+    attributes:
+      label: Dependências e gates
+      description: Declare dependências, decisões humanas, ambiente e restrições de executor quando aplicáveis.
+    validations:
+      required: true
