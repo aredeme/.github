@@ -1,14 +1,35 @@
-## Objetivo
+## Problema e solução
 
-Adicionar o template organizacional de Issue para registrar trabalhos do Arede.Me de forma padronizada.
+<!-- Resuma o problema atendido e a solução implementada. -->
 
-## O que mudou
+## Issue vinculada
 
-- criado o template `Trabalho`;
-- adicionados campos de objetivo, contexto, escopo, critérios de conclusão, risco e documento governante.
+<!-- Use referência inequívoca, por exemplo: Closes #123 ou owner/repo#123. -->
 
-## Validação
+## Alterações
 
-- arquivo YAML criado no repositório `.github`;
-- branch `chore/github-templates`;
-- alteração pronta para revisão e merge.
+<!-- Liste arquivos, componentes e comportamentos relevantes. -->
+
+## Testes e checks
+
+<!-- Registre somente checks efetivamente executados e seus resultados. -->
+
+## Riscos, dados e segurança
+
+<!-- Perfil de rigor, dados envolvidos, impacto de segurança e limitações. -->
+
+## Migrations e rollback
+
+<!-- Quando não aplicável, declare N/A. Quando aplicável, descreva recuperação. -->
+
+## Evidências
+
+<!-- Links para Actions, logs permitidos, screenshots ou provas do objeto. Não inclua segredos. -->
+
+## Pendências
+
+<!-- Declare achados fora do escopo e dependências remanescentes. -->
+
+## Perfil de rigor
+
+<!-- comum | sensivel | operacional_critico -->
