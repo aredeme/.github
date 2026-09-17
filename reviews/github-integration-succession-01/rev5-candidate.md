@@ -18,7 +18,7 @@ Replace the sentence that assigns structural-suspicion signaling specifically to
 
 **Nenhuma admissão nova ao Project principal ocorre fora do caminho governado**, ainda que exista primitive raw tecnicamente acessível por API, MCP, UI, Action, CLI ou outra ferramenta.
 
-**Nenhuma remoção, arquivamento ou evicção de item central ocorre fora do caminho governado**, ainda que exista primitive raw tecnicamente acessível. A saída da fila preserva a Issue e seus vínculos, usa decisão fresca e reversível quando a plataforma permitir, declara a pós-condição esperada e falha fechado diante de resultado `UNKNOWN`.
+**Nenhuma remoção, arquivamento ou evicção de item central ocorre fora do caminho governado**, ainda que exista primitive raw tecnicamente acessível. A saída da fila preserva a Issue e seus vínculos, usa decisão fresca e reversível quando a plataforma permitir, declara a pós-condição esperada, verifica-a na fonte proprietária conforme §14 antes de considerar a saída concluída, e falha fechado diante de resultado `UNKNOWN` ou de pós-condição não observada.
 
 Antes de qualquer add ou saída, a coordenação resolve e avalia, no mínimo:
 
@@ -39,7 +39,7 @@ Broad auto-add por simples condição de `open`, repositório, label ou filtro g
 
 Uma primitive raw de add/archive/remove/update é apenas **mecanismo de aplicação**. A existência de acesso técnico à primitive não cria authority e não permite contornar policy, hierarchy, freshness ou Gate aplicável.
 
-A decisão deve ser registrada de forma recuperável somente quando isso for material para continuidade, disputa, risco, auditoria ou prevenção de retrabalho. `REPO_ONLY`/`STOP` rotineiros não exigem log permanente por ritual.
+Toda decisão que resulte em `ADMIT` ou `EVICT` central deixa registro recuperável na própria Issue afetada ou em objeto já vinculado a ela, com alvo exato, decisão, migration stage observado e freshness usada — é isso que torna o ato governado distinguível de add/remoção raw por conveniência. As demais decisões são registradas de forma recuperável somente quando isso for material para continuidade, disputa, risco, auditoria ou prevenção de retrabalho; `REPO_ONLY`/`STOP` rotineiros não exigem log permanente por ritual. Nenhum banco de plans, journal, serviço ou runtime próprio é exigido para isso: a superfície proprietária do próprio objeto já é suficiente.
 
 Resultado ambíguo falha fechado.
 
@@ -64,8 +64,10 @@ O enforcement material deve garantir, quando aplicável:
 - schema/migration stage compatível com o efeito;
 - hierarchy/admission/transição válidas;
 - freshness suficiente imediatamente antes da mutation quando a decisão depender de estado previamente lido;
-- pós-condição verificável;
+- pós-condição declarada antes do efeito e verificada na fonte proprietária antes de reportar sucesso, quando a mutation for material;
 - reconciliação antes de retry quando o resultado for `UNKNOWN`.
+
+Sucesso não se presume a partir da resposta da superfície. Para mutation material — admissão, saída da fila, `Type`/`Parent`/hierarchy, `Status`, Gate ou schema — o resultado só é sucesso depois que releitura suficiente da fonte proprietária confirmar a pós-condição declarada. Erro explícito da superfície é `FAILED`. Efeito ausente ou divergente da pós-condição também é `FAILED` quando a releitura for conclusiva, ainda que a superfície tenha reportado êxito. Efeito parcial, releitura inconclusiva ou pós-condição não observável no momento são `UNKNOWN` e exigem reconciliação antes de qualquer retry, conforme §17. A exigência é proporcional: operação trivial, sem efeito governado e sem prova dependente, não exige releitura por ritual.
 
 Não existe requisito de `arede-github-projects`, GitHub Gateway próprio, MCP próprio, contrato de runtime próprio, banco de plans ou proxy intermediário por antecipação.
 
@@ -118,31 +120,37 @@ Não existe obrigação de criar um runtime intermediário apenas para produzir 
 
 Versão declarada sem vínculo ao objeto realmente executado não basta quando o fingerprint é material. Da mesma forma, nome de ferramenta, login ou protocolo não substituem authority/capability.
 
+Drift material observado entre source, norma vigente e objeto realmente executado, ou entre a capability/semântica esperada da superfície e a observada, bloqueia até reconciliação o efeito que dependa da propriedade divergente.
+
 ## §17 — Retry e reconciliação — keep rule, adjust wording
 
 Read pode repetir quando o contrato garantir segurança.
 
-Mutation com timeout ou resultado desconhecido nunca recebe retry cego. Primeiro reler a fonte proprietária e reconciliar o efeito; repetir somente quando ausência do efeito, idempotência ou condição equivalente estiver comprovada.
+Mutation com timeout ou resultado desconhecido nunca recebe retry cego. Primeiro reler a fonte proprietária e reconciliar o efeito; repetir somente quando ausência do efeito, idempotência ou outra condição observada no alvo que exclua efeito duplicado estiver comprovada. Releitura inconclusiva não é comprovação e falha fechado.
 
 Operação composta que pare após mutation parcial retorna estado explícito de reconciliação necessária; não mascara sucesso nem continua por presunção.
 
 Essa regra pertence ao método Arede e se aplica independentemente de a mutation ter sido executada por API, MCP, Action, UI, CLI, serviço próprio ou outra superfície.
 
-## §28 — Migração e compatibilidade — replace items 2, 6, 7 and final paragraph
+## §28 — Migração e compatibilidade — replace items 2, 6, 7 and closing paragraphs
 
 Keep the rev4 caput and unchanged items. The Project-migration prerequisites become:
 
 1. esta revisão estar promovida pela authority aplicável;
-2. existir mecanismo de coordenação/enforcement capaz de consumir a norma vigente e o migration stage aplicável, sem exigir runtime próprio quando as superfícies oficiais forem suficientes;
+2. a superfície de coordenação/enforcement escolhida estar disponível e já ter sido provada em fluxo representativo e revisável — leitura → decisão governada → mutation autorizada → releitura da pós-condição —, com caso negativo que termina sem mutation, consumindo a norma vigente e o migration stage aplicável, sem exigir runtime próprio quando as superfícies oficiais forem suficientes;
 3. existir diagnóstico read-only do drift atual;
 4. existir plano exato e reversível para **schema, Organization Issue Fields, Project fields, views e hierarchy/parents dos itens existentes**;
 5. a reconciliação de propriedade em `POLÍTICA — Fontes de verdade` estar preparada para o cutover `Módulo/Risco -> Area/Risk`;
 6. o caminho de mutation admitido impedir que nova admissão desorganizada recrie o problema durante a limpeza;
-7. cada mutation resolver/revalidar o objeto vivo e falhar fechado se o estágio tiver avançado materialmente.
+7. cada mutation resolver/revalidar o objeto vivo, falhar fechado se o estágio tiver avançado materialmente e ter a pós-condição verificada conforme §14 antes de o lote ser dado por concluído; item cuja pós-condição não se confirme é tratado como `FAILED` ou `UNKNOWN` conforme §14 e reconciliado antes de qualquer retry.
 
-Final paragraph:
+Closing paragraphs:
 
-> A promoção desta norma não autoriza, por consequência, restaurar, manter, remover ou criar conector/runtime GitHub próprio. A escolha da superfície de integração é substituível e deve seguir consumidor real, capacidade nativa disponível, custo total, authority e H7/H8. Aposentadoria de predecessor técnico só ocorre depois de prova suficiente das capacidades que continuam materialmente necessárias.
+> A promoção desta norma não autoriza, por consequência, restaurar, manter, remover ou criar conector/runtime GitHub próprio. A escolha da superfície de integração é substituível e deve seguir consumidor real, capacidade nativa disponível, custo total, authority e H7/H8.
+>
+> Aposentadoria de predecessor técnico exige substituição real provada, não prova documental. São condições cumulativas: a superfície sucessora estar operante no caminho real sob authority aplicável; as capacidades que continuam materialmente necessárias estarem provadas nessa superfície; os consumidores materiais estarem identificados e efetivamente migrados ou cortados para ela; nenhum consumidor material, humano ou automatizado, ainda depender do predecessor; e o cutover estar provado por pós-condição observada. Enquanto qualquer uma dessas condições não estiver provada, a aposentadoria falha fechado e o predecessor permanece.
+>
+> Capacidade do predecessor sem consumidor material real não exige paridade: é classificada como dispensada conforme H3/H7, não como pendência de prova. Cada objeto do predecessor — repositório, runtime, workflow, IaC, App ou credencial — é aposentado sob a authority e o boundary que lhe são próprios; a prova relativa a um objeto não autoriza a retirada de outro.
 
 ## §29 — Efeito desta revisão — replace fully
 
@@ -152,8 +160,9 @@ Em especial, a revisão 5:
 
 - mantém o Project central como fila transversal seletiva e preserva a recuperabilidade de Issues repo-locais;
 - mantém hierarchy nativa, migration stages, `Risk`/`Area` prospectivos, `Status`, `Executor`, Gate, Ready/Done e as views-alvo definidos na rev4;
-- mantém broad auto-add proibido e mantém add/remoção/arquivamento/evicção sujeitos a decisão governada e fresca;
-- preserva fail-closed, authority/capability, freshness material, pós-condição e reconciliação antes de retry quando resultado for `UNKNOWN`;
+- mantém broad auto-add proibido e mantém add/remoção/arquivamento/evicção sujeitos a decisão governada, fresca e recuperável no próprio alvo quando resultarem em `ADMIT`/`EVICT`;
+- preserva fail-closed, authority/capability, freshness material, pós-condição verificada em mutation material e reconciliação antes de retry quando resultado for `UNKNOWN`;
+- condiciona a aposentadoria de predecessor técnico a substituição operante no caminho real, cutover provado dos consumidores materiais e ausência de consumidor remanescente, sem exigir paridade com capacidade sem consumidor real;
 - estabelece que policy/enforcement pertencem ao sistema Arede e **não** ao protocolo ou conector usado para alcançar o GitHub;
 - permite usar superfícies oficiais/API/MCP/Actions/UI/CLI adequadas sem criar proxy próprio por ritual;
 - elimina a obrigação de `arede-github-projects`, GitHub Gateway próprio, runtime MCP dedicado, identidade específica de connector ou banco de plans;
@@ -162,7 +171,7 @@ Em especial, a revisão 5:
 
 ## Promotion-time nominal sweep
 
-When materializing rev5 into the canonical document, perform a final textual sweep and replace remaining normative references where `MCP`, `arede-github-projects`, `runtime MCP`, `connector version`, or equivalent language is treated as an **architectural requirement**. Historical/provenance references may remain when clearly qualified as predecessor.
+When materializing rev5 into the canonical document, the sweep is a **nominal substitution only**: it applies solely the replacements in this delta and may not remove, weaken or reassign any obligation, fail-closed condition, postcondition, freshness requirement or authority attribution in any section. Any other rev4 section still treating `MCP`, `arede-github-projects`, `runtime MCP`, `connector version` or equivalent language as an **architectural requirement** is listed and becomes an explicit delta, reviewed before promotion — not rewritten at materialization time. Historical/provenance references may remain when clearly qualified as predecessor.
 
 ## Independent-review questions
 
