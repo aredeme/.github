@@ -18,7 +18,7 @@ Replace the sentence that assigns structural-suspicion signaling specifically to
 
 **Nenhuma admissão nova ao Project principal ocorre fora do caminho governado**, ainda que exista primitive raw tecnicamente acessível por API, MCP, UI, Action, CLI ou outra ferramenta.
 
-**Nenhuma remoção, arquivamento ou evicção de item central ocorre fora do caminho governado**, ainda que exista primitive raw tecnicamente acessível. A saída da fila preserva a Issue e seus vínculos, usa decisão fresca e reversível quando a plataforma permitir, declara a pós-condição esperada, verifica-a na fonte proprietária conforme §14 antes de considerar a saída concluída, e falha fechado diante de resultado `UNKNOWN` ou de pós-condição não observada.
+**Nenhuma remoção, arquivamento ou evicção de item central ocorre fora do caminho governado**, ainda que exista primitive raw tecnicamente acessível. A saída da fila preserva a Issue e seus vínculos, usa decisão fresca e reversível quando a plataforma permitir, declara a pós-condição esperada, verifica-a na fonte proprietária conforme §14 antes de considerar a saída concluída, e falha fechado diante de qualquer resultado que não seja sucesso confirmado.
 
 Antes de qualquer add ou saída, a coordenação resolve e avalia, no mínimo:
 
@@ -65,9 +65,9 @@ O enforcement material deve garantir, quando aplicável:
 - hierarchy/admission/transição válidas;
 - freshness suficiente imediatamente antes da mutation quando a decisão depender de estado previamente lido;
 - pós-condição declarada antes do efeito e verificada na fonte proprietária antes de reportar sucesso, quando a mutation for material;
-- reconciliação antes de retry quando o resultado for `UNKNOWN`.
+- retry de mutation somente nas condições de §17; nenhum rótulo de resultado autoriza repetição por si.
 
-Sucesso não se presume a partir da resposta da superfície. Para mutation material — admissão, saída da fila, `Type`/`Parent`/hierarchy, `Status`, Gate ou schema — o resultado só é sucesso depois que releitura suficiente da fonte proprietária confirmar a pós-condição declarada. Erro explícito da superfície é `FAILED`. Efeito ausente ou divergente da pós-condição também é `FAILED` quando a releitura for conclusiva, ainda que a superfície tenha reportado êxito. Efeito parcial, releitura inconclusiva ou pós-condição não observável no momento são `UNKNOWN` e exigem reconciliação antes de qualquer retry, conforme §17. A exigência é proporcional: operação trivial, sem efeito governado e sem prova dependente, não exige releitura por ritual.
+Sucesso não se presume a partir da resposta da superfície. Para mutation material — admissão, saída da fila, `Type`/`Parent`/hierarchy, `Status`, Gate ou schema — o resultado só é sucesso depois que releitura suficiente da fonte proprietária confirmar a pós-condição declarada. Qualquer outro resultado é classificado pelo que a fonte proprietária prova sobre o efeito, nunca pela resposta da superfície: `FAILED` somente quando a releitura provar conclusivamente que nenhum efeito ocorreu; **reconciliação necessária** quando houver efeito parcial, divergente ou diferente do declarado, ainda que a superfície tenha reportado êxito; `UNKNOWN` quando a releitura for impossível ou inconclusiva, ou a pós-condição ainda não for observável. Erro explícito da superfície é apenas sinal: não prova ausência de efeito e, sem releitura conclusiva, é `UNKNOWN`. Nenhum desses rótulos autoriza repetição por si; retry segue exclusivamente §17. A exigência é proporcional: operação trivial, sem efeito governado e sem prova dependente, não exige releitura por ritual.
 
 Não existe requisito de `arede-github-projects`, GitHub Gateway próprio, MCP próprio, contrato de runtime próprio, banco de plans ou proxy intermediário por antecipação.
 
@@ -91,7 +91,7 @@ Condições que impedem write incluem, quando materiais:
 - Type/Parent/hierarquia inválidos;
 - decisão calculada sobre estado que avançou materialmente;
 - Project/Issue diferentes do alvo aprovado;
-- resultado anterior de mutation ainda `UNKNOWN` quando ele puder interferir no novo efeito;
+- resultado anterior de mutation ainda `UNKNOWN` ou em reconciliação necessária, quando ele puder interferir no novo efeito;
 - duplicidade material não resolvida;
 - authority/capability insuficiente.
 
@@ -126,7 +126,7 @@ Drift material observado entre source, norma vigente e objeto realmente executad
 
 Read pode repetir quando o contrato garantir segurança.
 
-Mutation com timeout ou resultado desconhecido nunca recebe retry cego. Primeiro reler a fonte proprietária e reconciliar o efeito; repetir somente quando ausência do efeito, idempotência ou outra condição observada no alvo que exclua efeito duplicado estiver comprovada. Releitura inconclusiva não é comprovação e falha fechado.
+Mutation cujo resultado não seja sucesso confirmado nunca recebe retry cego, qualquer que seja o sinal da superfície ou o rótulo atribuído conforme §14 — timeout, erro explícito, `UNKNOWN`, reconciliação necessária ou mesmo `FAILED`. Primeiro reler a fonte proprietária e reconciliar o efeito real. Repetir somente quando a fonte proprietária provar ausência do efeito (`FAILED` conforme §14) ou quando idempotência ou outra condição observada no alvo excluir efeito duplicado; releitura inconclusiva não é comprovação e falha fechado. Efeito parcial ou divergente não é repetido: é reconciliado, e só então se decide nova mutation. Toda repetição é nova mutation e passa integralmente pelas pré-condições de §14 e §15 — `FAILED` satisfaz a prova de ausência de efeito, mas não substitui authority, freshness e alvo revalidados.
 
 Operação composta que pare após mutation parcial retorna estado explícito de reconciliação necessária; não mascara sucesso nem continua por presunção.
 
@@ -142,7 +142,7 @@ Keep the rev4 caput and unchanged items. The Project-migration prerequisites bec
 4. existir plano exato e reversível para **schema, Organization Issue Fields, Project fields, views e hierarchy/parents dos itens existentes**;
 5. a reconciliação de propriedade em `POLÍTICA — Fontes de verdade` estar preparada para o cutover `Módulo/Risco -> Area/Risk`;
 6. o caminho de mutation admitido impedir que nova admissão desorganizada recrie o problema durante a limpeza;
-7. cada mutation resolver/revalidar o objeto vivo, falhar fechado se o estágio tiver avançado materialmente e ter a pós-condição verificada conforme §14 antes de o lote ser dado por concluído; item cuja pós-condição não se confirme é tratado como `FAILED` ou `UNKNOWN` conforme §14 e reconciliado antes de qualquer retry.
+7. cada mutation resolver/revalidar o objeto vivo, falhar fechado se o estágio tiver avançado materialmente e ter a pós-condição verificada conforme §14 antes de o lote ser dado por concluído; item cuja pós-condição não se confirme é classificado conforme §14 e só é repetido nas condições de §17.
 
 Closing paragraphs:
 
@@ -161,7 +161,7 @@ Em especial, a revisão 5:
 - mantém o Project central como fila transversal seletiva e preserva a recuperabilidade de Issues repo-locais;
 - mantém hierarchy nativa, migration stages, `Risk`/`Area` prospectivos, `Status`, `Executor`, Gate, Ready/Done e as views-alvo definidos na rev4;
 - mantém broad auto-add proibido e mantém add/remoção/arquivamento/evicção sujeitos a decisão governada, fresca e recuperável no próprio alvo quando resultarem em `ADMIT`/`EVICT`;
-- preserva fail-closed, authority/capability, freshness material, pós-condição verificada em mutation material e reconciliação antes de retry quando resultado for `UNKNOWN`;
+- preserva fail-closed, authority/capability, freshness material, pós-condição verificada em mutation material e reconciliação antes de retry para qualquer resultado que não seja sucesso confirmado;
 - condiciona a aposentadoria de predecessor técnico a substituição operante no caminho real, cutover provado dos consumidores materiais e ausência de consumidor remanescente, sem exigir paridade com capacidade sem consumidor real;
 - estabelece que policy/enforcement pertencem ao sistema Arede e **não** ao protocolo ou conector usado para alcançar o GitHub;
 - permite usar superfícies oficiais/API/MCP/Actions/UI/CLI adequadas sem criar proxy próprio por ritual;
